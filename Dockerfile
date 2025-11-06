@@ -5,6 +5,7 @@ FROM ubuntu:22.04
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libglib2.0-0 libglib2.0-bin libx11-6 libx11-xcb1 libgl1-mesa-glx \
+    libharfbuzz0b libfreetype6 fontconfig \
     libxrender1 libxi6 libxext6 libxfixes3 libxcb1 \
     libxcb-keysyms1 libxcb-render0 libxcb-shape0 libxcb-shm0 \
     libxcb-xfixes0 libxcb-icccm4 libxcb-image0 libxcb-sync1 \
