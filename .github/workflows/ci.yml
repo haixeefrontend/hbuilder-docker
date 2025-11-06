@@ -20,6 +20,9 @@ jobs:
             url: https://download1.dcloud.net.cn/download/HBuilderX.4.84.2025102304-alpha.linux_x64.full.tar.gz
           - version: stable
             url: https://download1.dcloud.net.cn/download/HBuilderX.4.84.2025110307.linux_x64.full.tar.gz
+        slim:
+          - true
+          - false
 
     name: Build HBuilderX Docker Image (${{ matrix.hbuilderx.version }})
 
@@ -36,30 +39,14 @@ jobs:
             --platform linux/amd64 \
             -t hbuilderx:${{ matrix.hbuilderx.version }} \
             --build-arg HBUILDERX_URL=${{ matrix.hbuilderx.url }} \
-            --output type=docker,dest=./hbuilderx.${{ matrix.hbuilderx.version }}.tar .
-
-      - name: Build Slim Docker image for HBuilderX ${{ matrix.hbuilderx.version }}
-        if: always()
-        run: |
-          docker buildx build \
-            --platform linux/amd64 \
-            -t hbuilderx:${{ matrix.hbuilderx.version }}-slim \
-            --build-arg HBUILDERX_URL=${{ matrix.hbuilderx.url }} \
-            --build-arg SLIM=true \
-            --output type=docker,dest=./hbuilderx.${{ matrix.hbuilderx.version }}-slim.tar .
+            --build-arg SLIM=${{ matrix.slim }} \
+            --output type=docker,dest=./hbuilderx.${{ matrix.hbuilderx.version }}${{ matrix.slim && '-slim' }}.tar .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hbuilderx.${{ matrix.hbuilderx.version }}.tar.zip
-          path: ./hbuilderx.${{ matrix.hbuilderx.version }}.tar
-
-      - name: Upload slim artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: hbuilderx.${{ matrix.hbuilderx.version }}-slim.tar.zip
-          path: ./hbuilderx.${{ matrix.hbuilderx.version }}-slim.tar
-          
+          name: hbuilderx.${{ matrix.hbuilderx.version }}${{ matrix.slim && '-slim' }}.tar.zip
+          path: ./hbuilderx.${{ matrix.hbuilderx.version }}${{ matrix.slim && '-slim' }}.tar
 
   release:
     needs: build
