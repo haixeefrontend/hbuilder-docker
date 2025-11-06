@@ -20,7 +20,9 @@ RUN apt-get update && \
     libmtdev1 libinput10 libquazip5-1 \
     fish wget tar curl \
     # n 需要这些依赖
-    git make && \
+    git make \
+    # tini 用于作为 PID 1 进程，处理僵尸进程
+    tini && \
     rm -rf /var/lib/apt/lists/*
 
 ARG HBUILDERX_URL
@@ -45,5 +47,8 @@ RUN curl -L https://bit.ly/n-install | bash -s -- -y 22 && \
 # 设置环境变量
 ENV PATH="${N_PREFIX}/bin:/opt/hbuilderx:/opt/hbuilderx/bin:${PATH}"
 
-# 默认启动 shell
-CMD ["fish"]
+COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
+
+CMD []
