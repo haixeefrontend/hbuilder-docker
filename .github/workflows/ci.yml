@@ -21,6 +21,8 @@ jobs:
           - version: stable
             url: https://download1.dcloud.net.cn/download/HBuilderX.4.84.2025110307.linux_x64.full.tar.gz
 
+    name: Build HBuilderX Docker Image (${{ matrix.hbuilderx.version }})
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,7 +41,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hbuilderx-image
+          name: hbuilderx-${{ matrix.hbuilderx.version }}-image
           path: ./hbuilderx.${{ matrix.hbuilderx.version }}.tar
 
   release:
@@ -50,8 +52,8 @@ jobs:
       - name: Download built image
         uses: actions/download-artifact@v4
         with:
-          name: hbuilderx-image
           path: .
+          merge-multiple: true
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
