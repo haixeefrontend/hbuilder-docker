@@ -34,10 +34,12 @@ RUN wget ${HBUILDERX_URL} -O hbuilderx.tar.gz && \
 
 # 创建用户 node
 RUN useradd -m -s /usr/bin/fish node
+ENV N_PREFIX=/home/node/.n
 
 # 以用户 node 安装 nodejs 22
 USER node
 RUN curl -L https://bit.ly/n-install | bash -s -- -y 22 && \
+    mkdir -p $HOME/.n && \
     /home/node/n/bin/n 22
 
 # 设置环境变量
