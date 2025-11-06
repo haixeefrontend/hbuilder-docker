@@ -17,8 +17,9 @@ RUN wget --no-check-certificate ${HBUILDERX_URL} -qO hbuilderx.tar.gz && \
     mkdir /opt/hbuilderx && \
     tar -xzf hbuilderx.tar.gz -C /opt/hbuilderx --strip-components=1 && \
     strip --strip-unneeded /opt/hbuilderx/cli /opt/hbuilderx/HBuilderX && \
-    find /opt/hbuilderx -type f -name "*.so*" -exec strip --strip-unneeded {} || true \; && \
-    # 精简 HBuilderX
+    find /opt/hbuilderx -type f -name "*.so*" -exec strip --strip-unneeded {} || true \;
+
+# 精简 HBuilderX
 RUN if [ ${SLIM} == "true" ]; then \
     # Remove unnecessary files to reduce image size
     rm -rf /opt/hbuilderx/{readme,LICENSE*,ReleaseNote*} && \
