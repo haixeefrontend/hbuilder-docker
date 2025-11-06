@@ -1,11 +1,22 @@
 FROM node:22-bookworm-slim AS node
 
+FROM ubuntu:22.04 AS builder
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    wget tar curl
+
+ARG HBUILDERX_URL
+
+# 下载 HBuilderX
+WORKDIR /opt
+RUN wget --no-check-certificate ${HBUILDERX_URL} -O hbuilderx.tar.gz && \
+    mkdir /opt/hbuilderx && \
+    tar -xzf hbuilderx.tar.gz -C /opt/hbuilderx --strip-components=1 && \
+    rm hbuilderx.tar.gz
+
 # 基础镜像：Ubuntu 22.04（兼容性最好）
 FROM ubuntu:22.04
-
-# 从 node 镜像复制 Node.js 运行环境
-COPY --from=node /usr/local/bin/node /usr/local/bin/node
-COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 # 设置时区为上海
 ENV TZ=Asia/Shanghai
@@ -24,7 +35,7 @@ RUN apt-get update && \
     zlib1g libstdc++6 libgcc-s1 libzstd1 libcairo2 \
     libxkbcommon0 libxkbcommon-x11-0 libasound2 \
     libmtdev1 libinput10 libquazip5-1 \
-    fish wget tar curl \
+    fish \
     # tini 用于作为 PID 1 进程，处理僵尸进程
     tini && \
     # 清理缓存
@@ -32,14 +43,13 @@ RUN apt-get update && \
     apt purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
     rm -rf /tmp/*
 
-ARG HBUILDERX_URL
+# 从 builder 镜像复制 HBuilderX
+COPY --from=builder /opt/hbuilderx /opt/hbuilderx
 
-# 下载 HBuilderX
-WORKDIR /opt
-RUN wget --no-check-certificate ${HBUILDERX_URL} -O hbuilderx.tar.gz && \
-    mkdir /opt/hbuilderx && \
-    tar -xzf hbuilderx.tar.gz -C /opt/hbuilderx --strip-components=1 && \
-    rm hbuilderx.tar.gz
+# 从 node 镜像复制 Node.js 运行环境
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node /opt/yarn-* /opt/
+COPY --from=node /usr/local/bin/node /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn* /usr/local/bin/
 
 # 创建用户 node
 RUN useradd -m -s /usr/bin/fish node
