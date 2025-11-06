@@ -48,6 +48,7 @@ RUN useradd -m -s /usr/bin/fish node
 ENV PATH="/opt/hbuilderx:/opt/hbuilderx/bin:${PATH}"
 
 COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
 
