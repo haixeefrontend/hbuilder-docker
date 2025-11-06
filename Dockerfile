@@ -19,7 +19,7 @@ RUN wget --no-check-certificate ${HBUILDERX_URL} -qO hbuilderx.tar.gz && \
     strip --strip-unneeded /opt/hbuilderx/cli /opt/hbuilderx/HBuilderX && \
     find /opt/hbuilderx -type f -name "*.so*" -exec strip --strip-unneeded {} || true \; && \
     # 精简 HBuilderX
-    [[ ${SLIM} == "true" ]] && \
+RUN if [ ${SLIM} == "true" ]; then \
     # Remove unnecessary files to reduce image size
     rm -rf /opt/hbuilderx/{readme,LICENSE*,ReleaseNote*} && \
     # Remove some plugin that are not commonly used in Linux environment
@@ -35,7 +35,7 @@ RUN wget --no-check-certificate ${HBUILDERX_URL} -qO hbuilderx.tar.gz && \
         # Editor Language Support
         hbuilderx-language-services,\
         hbuilderx-issue-reporter\
-    }
+    }; fi
 
 # 基础镜像：Ubuntu 22.04（兼容性最好）
 FROM ubuntu:22.04
@@ -71,7 +71,12 @@ COPY --from=builder /opt/hbuilderx /opt/hbuilderx
 # 从 node 镜像复制 Node.js 运行环境
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=node /opt/yarn-* /opt/
-COPY --from=node /usr/local/bin/node /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn* /usr/local/bin/
+COPY --from=node /usr/local/bin/node /usr/local/bin/
+RUN ln -s /usr/local/lib/corepack/dist/corepack.js /usr/local/bin/corepack && \
+    ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
+    ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx && \
+    ln -s /opt/yarn-*/bin/yarn /usr/local/bin/yarn && \
+    ln -s /opt/yarn-*/bin/yarnpkg /usr/local/bin/yarnpkg
 
 
 # 设置环境变量
