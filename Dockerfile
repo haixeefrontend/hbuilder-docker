@@ -46,13 +46,19 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # 安装依赖（Qt5、ICU、glib、zlib 等）
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    libglib2.0-0 libx11-6 libgl1-mesa-glx \
+    libglib2.0-0 libgl1-mesa-glx \
     libharfbuzz0b libfreetype6 \
     libxrender1 libstdc++6 libgcc-s1 \
     libpcre2-16-0 libicu70 zlib1g \
-    ca-certificates \
+    libx11-6 libx11-xcb1 libxcb1 libxcb-render0 libxcb-shm0 \
+    libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 \
+    libxcb-shape0 libxcb-sync1 libxcb-xfixes0 libxcb-xinerama0 \
+    libxcb-util1 libxcb-render-util0 libxext6 libxfixes3 libxi6 \
+    libxkbcommon0 libxkbcommon-x11-0 libfontconfig1 \
+    ca-certificates tini \
+    locales && \
+    locale-gen zh_CN.UTF-8 && \
     # tini 用于作为 PID 1 进程，处理僵尸进程
-    tini && \
     # 清理缓存
     rm -rf /var/lib/apt/lists/* && \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
