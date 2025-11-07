@@ -3,7 +3,7 @@ set -e
 
 echo "🚀 Starting HBuilderX in background..."
 
-/opt/HBuilderX/HBuilderX > /var/log/hbuilderx.log 2>&1 &
+/opt/hbuilderx/HBuilderX > /var/log/hbuilderx.log 2>&1 &
 
 echo "✅ HBuilderX started."
 

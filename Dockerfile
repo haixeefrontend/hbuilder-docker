@@ -15,7 +15,12 @@ ARG SLIM=false
 WORKDIR /opt
 COPY ${HBUILDERX_PATH} /opt/hbuilderx
 RUN strip --strip-unneeded /opt/hbuilderx/cli /opt/hbuilderx/HBuilderX && \
-    find /opt/hbuilderx -type f -name "*.so*" -exec strip --strip-unneeded {} || true \;
+    find /opt/hbuilderx -type f -name "*.so*" -exec strip --strip-unneeded {} || true \; && \
+    # NOTE: HBuilderX 依赖 Qt5Network 库，但在 Ubuntu 22.04 中该库需求的 libssl1.1 在系统中不存在
+    # 因此需要手动安装 libssl1.1
+    # 我们先用 wget 下载到 builder 镜像，等会从 builder 镜像复制到最终镜像中
+    wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && \
+    dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb
 
 # 精简 HBuilderX
 # plugins 目录下只保留 about compile-dart-sass compile-less compile-node-sass uniapp-cli uniapp-cli-vite
@@ -55,6 +60,13 @@ RUN apt-get update && \
 
 # 从 builder 镜像复制 HBuilderX
 COPY --from=builder /opt/hbuilderx /opt/hbuilderx
+
+# 从 builder 镜像复制 libssl1.1
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libssl.so.1.1 /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/
+# 创建软链接确保 Qt5 能找到 libssl 和 libcrypto
+RUN ln -s /usr/lib/x86_64-linux-gnu/libssl.so.1.1 /usr/lib/x86_64-linux-gnu/libssl.so && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so
 
 # 从 node 镜像复制 Node.js 运行环境
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
