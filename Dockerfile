@@ -21,8 +21,8 @@ COPY ${HBUILDERX_PATH} /opt/hbuilderx
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    wget tar curl xz-utils \
-    binutils squashfs-tools && \
+    wget tar curl \
+    binutils && \
     # 精简二进制文件和共享库
     strip --strip-unneeded /opt/hbuilderx/cli /opt/hbuilderx/HBuilderX && \
     find /opt/hbuilderx -type f -name "*.so*" -exec strip --strip-unneeded {} || true \; && \
@@ -54,9 +54,7 @@ RUN apt-get update && \
     # 复制需要保留的插件
     for f in about uniapp-uts-v1 compile-less compile-node-sass uniapp-cli uniapp-cli-vite; \
         do cp -r /opt/hbuilderx_full/plugins/$f /opt/hbuilderx/plugins/; done \
-    fi; \
-    # 打包 HBuilderX 以便后续复制
-    tar -cJf /opt/hbuilderx.tar.xz -C /opt hbuilderx
+    fi;
 
 # 基础镜像：Debian Bookworm Slim
 FROM debian:bookworm-slim
@@ -67,7 +65,7 @@ ENV TZ=Asia/Shanghai
 ADD https://github.com/ncopa/su-exec/releases/download/v0.3/su-exec-static-v0.3-x86_64 /usr/local/bin/su-exec
 
 # 从 builder 镜像复制 HBuilderX
-COPY --from=builder /opt/hbuilderx.tar.xz /opt/hbuilderx.tar.xz
+COPY --from=builder /opt/hbuilderx /opt/hbuilderx
 
 # 从 builder 镜像复制 libssl1.1
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libssl.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/
