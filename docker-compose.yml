@@ -1,6 +1,8 @@
 services:
   hbuilderx:
     build:
+      tags:
+        - hbuilderx:latest
       context: .
       args:
         SLIM: "true"
